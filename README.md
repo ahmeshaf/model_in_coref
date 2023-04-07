@@ -15,10 +15,10 @@ python parse_ecb.py en_core_web_md ./ecbPlus/ECB+_LREC2014 test ecb_test_set.jso
 ### Running the Prodigy Recipe
 
 ```
-prodigy ecb_test_set en_core_web_md ecb_test_set.json -F coref_recipe.py
+evt-coref ecb_test_coref en_core_web_md ./ecb_test_set.json -F coref_recipe.py 
 ```
 
 ## Evaluation Methodology - Simulation
 
-Please see [Simulation.ipynb](Simulation.ipynb)
+Please see [recall_comparisons.ipynb](recall_comparisons.ipynb)
 
