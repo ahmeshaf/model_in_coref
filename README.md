@@ -1,5 +1,24 @@
-# law_2023_submission_1:
+# Law Submission 1
 
-## Simulation
+## Annotation interface
 
-## Annotation Interface with Prodigy
+### Preparing ECB+ Dataset
+
+- Event Coref Bank Plus Corpus: https://github.com/cltl/ecbPlus
+
+```
+git clone https://github.com/cltl/ecbPlus.git
+
+python parse_ecb.py en_core_web_md ./ecbPlus/ECB+_LREC2014 test ecb_test_set.json
+```
+
+### Running the Prodigy Recipe
+
+```
+prodigy ecb_test_set en_core_web_md ecb_test_set.json -F coref_recipe.py
+```
+
+## Evaluation Methodology - Simulation
+
+Please see [Simulation.ipynb](Simulation.ipynb)
+
