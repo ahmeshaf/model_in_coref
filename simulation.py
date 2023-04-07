@@ -458,7 +458,6 @@ def run_lambda_analysis(dataset, split, my_lams=None, ns=None):
 
 
 if __name__=='__main__':
-
     pairs_pk = './datasets/ecb/dpos/dev_lh_oracle_pairs_all.pkl'
     scores_ab_pk = './datasets/ecb/dpos/dev_lh_oracle_scores_ab_all.pkl'
 
@@ -466,3 +465,4 @@ if __name__=='__main__':
     # run_thres_analysis_bert_score('ecb', 'dev')
     # run_thres_analysis_lemma('ecb', 'dev')
     run_lambda_analysis('ecb', 'dev',)
+    run_lambda_analysis('gvc', 'dev',)

@@ -22,3 +22,8 @@ evt-coref ecb_test_coref en_core_web_md ./ecb_test_set.json -F coref_recipe.py
 
 Please see [recall_comparisons.ipynb](recall_comparisons.ipynb)
 
+Lambda Analysis on Dev sets
+```
+python simulation.py
+```
+
