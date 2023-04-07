@@ -1,3 +1,4 @@
+import time
 from collections import defaultdict
 from typing import Union, List, Dict
 
@@ -12,8 +13,9 @@ import numpy as np
 import prodigy
 import spacy
 import copy
+import threading
 # from prodigy.util import set_hashes
-
+JAVASCRIPT = ""
 DOC_HTML = """
 <style>
     .box{
@@ -24,29 +26,13 @@ DOC_HTML = """
     clear:both;
 }
 </style>
-<div class="box"><iframe src="{{target_doc}}" frameborder="0" scrolling="no" width="100%" height="512" align="left"> </iframe> </div>
+<div class="box"><iframe src="{{target_doc}}" frameborder="1" scrolling="yes" width="100%" height="512" align="left"> </iframe> </div>
 
-<div class="box"><iframe src="{{candidate_doc}}" frameborder="0" scrolling="no" width="100%" height="512" align="right">
+<div class="box"><iframe src="{{candidate_doc}}" frameborder="1" scrolling="yes" width="100%" height="512" align="right">
     </iframe>
 </div>
 <div class="clear"></div>
 """
-
-# JAVASCRIPT = """
-# document.addEventListener('prodigyanswer', event => {
-#         const { answer, task } = event.detail
-#         var marked_event = document.getElementById(task.mention_id);
-#         marked_event.scrollIntoView({
-#           behavior: "smooth",
-#           block: "start",
-#           inline: "nearest"
-#         });
-#     })
-#
-# function doThis() {
-#         window.prodigy.update({});
-#     }
-# """
 
 
 class CorefScorer:
@@ -115,7 +101,7 @@ class Clustering:
         self.comparisons = 0
 
     def candidates(self, task):
-        return self.clusters
+        return [c for c in self.clusters if c[0]['topic'] == task['topic']]
 
     def scored_candidates(self, target_task: dict, pooling=max):
         candidates = self.candidates(target_task)
@@ -128,94 +114,16 @@ class Clustering:
 
     def merge_cluster(self):
         print('merging')
-        # print(self.target_task['mention_id'])
-        self.candidate_cluster.append(self.target_task)
+        self.candidate_cluster.append(copy.deepcopy(self.target_task))
         # self.target_task = None
         self.found_cluster = True
 
     def add_cluster(self):
         self.clusters.append([self.target_task])
 
-    def create_target_span_task(self, target_task, candidate_tasks):
-        target_spacy_span = target_task.pop(SPACY_SPAN)
-        target_task_pro = copy.deepcopy(target_task)
-        target_task[SPACY_SPAN] = target_spacy_span
-        target_span = copy.deepcopy(target_task_pro['span'])
-
-        target_style = {"color": "blue", "background": "cyan",
-                        "font": "bold 1.0em ''"}
-
-        # the header for the Target
-        target_head_tokens = [
-            {'text': 'Target', 'style': target_style},
-            {'text': '\n'}
-        ]
-
-        # Join the tokens to create the text header
-        task_text = ''.join([tok['text'] for tok in target_head_tokens])
-
-        def add_offsets(span, tok_offset, char_offset):
-            span['token_start'] += tok_offset
-            span['token_end'] += tok_offset
-
-            # add char offsets
-            span['start'] += char_offset
-            span['end'] += char_offset
-
-        task_tok_start = len(target_head_tokens)
-        task_char_start = len(task_text)
-        add_offsets(target_span, task_tok_start, task_char_start)
-
-        cand_style = {"color": "green", "background": "lightgreen",
-                      "font": "bold 1.0em ''"}
-        cand_head_tokens = [
-            {'text': '\n'},
-            {'text': 'Candidate_Cluster', 'style': cand_style},
-            {'text': '\n'}
-        ]
-        cand_header = ''.join([tok['text'] for tok in cand_head_tokens])
-        task_tokens = target_head_tokens + target_task['tokens'] + cand_head_tokens
-        task_text = task_text + target_task_pro['text'] + cand_header
-        task_char_start = len(task_text)
-        task_tok_start = len(task_tokens)
-
-        task_spans = [target_span]
-        candidate_tasks_pro = []
-        for cand_task in candidate_tasks:
-            new_line = {'text': '\n'}
-            cand_spacy_span = cand_task.pop(SPACY_SPAN)
-            cand_task_pro = copy.deepcopy(cand_task)
-            cand_task[SPACY_SPAN] = cand_spacy_span
-            cand_span = copy.deepcopy(cand_task_pro['span'])
-            candidate_tasks_pro.append(cand_task_pro)
-            add_offsets(cand_span, task_tok_start, task_char_start)
-
-            task_tokens += cand_task_pro['tokens']
-            task_tokens += [new_line]
-            task_text = task_text + cand_task_pro['text'] + new_line['text']
-
-            task_tok_start = len(task_tokens)
-            task_char_start = len(task_text)
-
-            task_spans.append(cand_span)
-
-        return {
-            'text': task_text,
-            'span_pair': {
-                'target': target_task_pro,
-                'candidate': candidate_tasks_pro
-            },
-            'spans': task_spans,
-            'tokens': task_tokens,
-            'meta': {
-                'target_doc': target_task_pro['doc_id'],
-                'candidate_docs': set([task['doc_id'] for task in candidate_tasks_pro])
-            }
-        }
-
     def make_tasks(self, examples):
         for target_task in examples:
-            print('making', target_task['mention_id'])
+
             # set found cluster for the target to False
             self.found_cluster = False
 
@@ -223,13 +131,14 @@ class Clustering:
             scored_candidates = self.scored_candidates(target_task)[:self.num_cands]
 
             for cand_tasks, scores in scored_candidates:
-                print('making candidate', len(cand_tasks))
+                # print('making candidate', len(cand_tasks))
                 if self.found_cluster:
                     # print('no need to continue')
                     break
 
                 max_score = max(scores)
-                if max_score > 0:
+                if max_score > -1:
+                    # print('max_score')
                     cand_task = sorted(list(zip(cand_tasks, scores)),
                                                key=lambda x: x[-1],
                                                reverse=True)[0][0]
@@ -237,14 +146,21 @@ class Clustering:
                     coref_task = copy.deepcopy(target_task)
 
                     coref_task.pop('marked_doc')
-                    coref_task['target_doc'] = f'http://localhost:8090/{target_task["mention_id"]}.html#{target_task["mention_id"]}'
-                    coref_task['candidate_doc'] = f'http://localhost:8090/{cand_task["mention_id"]}.html#{cand_task["mention_id"]}'
+                    cand_task['target_doc'] = f'http://localhost:8090/{target_task["mention_id"]}.html#{target_task["mention_id"]}'
+                    cand_task['candidate_doc'] = f'http://localhost:8090/{cand_task["mention_id"]}.html#{cand_task["mention_id"]}'
+
+                    target_task[
+                        'target_doc'] = f'http://localhost:8090/{target_task["mention_id"]}.html#{target_task["mention_id"]}'
+                    target_task[
+                        'candidate_doc'] = f'http://localhost:8090/{cand_task["mention_id"]}.html#{cand_task["mention_id"]}'
 
                     self.target_task = target_task
                     self.candidate_cluster = cand_tasks
                     self.comparisons += 1
-                    # coref_task = set_hashes(coref_task)
-                    yield coref_task
+
+                    target_task['_task_hash'] = hash(target_task['mention_id'])
+                    target_task['_input_hash'] = -hash(target_task['mention_id'])
+                    yield target_task
             self.target_task = target_task
             if not self.found_cluster:
                 self.add_cluster()
@@ -275,20 +191,6 @@ def event_coref_recipe(dataset: str, spacy_model: str, source: str, num_cands: i
     # create clustering class. Build the clusters from existing annotations
     clusterer = Clustering(coref_scorer, dataset, './tmp/', num_cands)
 
-    import subprocess
-    # start a simple http server to access the generated html files
-    # command = 'python3 -m http.server -b 127.0.0.1 8000'
-    # p = subprocess.Popen(
-    #     [command],
-    #     shell=True,
-    #     stdin=None,
-    #     stdout=subprocess.PIPE,
-    #     stderr=subprocess.PIPE,
-    #     close_fds=True)
-    #
-    # def on_exit(varsa):
-    #     p.terminate()
-
     labels = ['COREF']
 
     # load the data
@@ -300,19 +202,17 @@ def event_coref_recipe(dataset: str, spacy_model: str, source: str, num_cands: i
         raise TypeError("Unknown Input Format")
 
     tasks = list(stream)
-    tasks = tasks[10:15]
     stream = add_tokens(nlp, tasks)
-    # stream = all_spans(stream)
-    stream = list(stream)
     stream = clusterer.make_tasks(stream)
-    print(stream)
+
+    # print(stream)
 
     def make_update(answers):
-        print('updating')
         answer = answers[0]
         if answer['answer'] == 'accept':
             clusterer.merge_cluster()
-        print(answer)
+            # time.sleep(2)
+        # return 1
 
     update = True
 
@@ -331,17 +231,18 @@ def event_coref_recipe(dataset: str, spacy_model: str, source: str, num_cands: i
         "show_stats": True,
         "blocks": blocks,
         "custom_theme": {"cardMaxWidth": 1000},
-        # "javascript": JAVASCRIPT,
+        "feed_overlap": False,
+        "javascript": JAVASCRIPT,
     }
 
-    config["batch_size"] = 10
+    # config["batch_size"] = 10
 
     if update:
-        config["batch_size"] = 1
+        config["batch_size"] = 1780
         config["instant_submit"] = True
 
     def before_db(answers):
-        print('hellp')
+        # print('hellp')
         return answers
 
     ctrl_dict = {
