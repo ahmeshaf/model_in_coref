@@ -1,6 +1,7 @@
 # How Good is the Model in Model-in-the-loop Event Coreference Resolution Annotations
 
 Code for the paper presented at the 17th Linguistics Annotation Workshop, ACL 2023.
+
 ## Annotation interface
 
 ### Preparing ECB+ Dataset
