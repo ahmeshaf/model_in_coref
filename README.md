@@ -11,7 +11,7 @@ Code for the paper presented at the 17th Linguistics Annotation Workshop, ACL 20
 ```
 git clone https://github.com/cltl/ecbPlus.git
 
-python parse_ecb.py en_core_web_md ./ecbPlus/ECB+_LREC2014 test ecb_test_set.json
+python parse_ecb.py en_core_web_md test
 ```
 
 ### Running the Prodigy Recipe
