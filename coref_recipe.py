@@ -15,7 +15,10 @@ import spacy
 import copy
 import threading
 from prodigy.util import set_hashes
-JAVASCRIPT = ""
+JAVASCRIPT = """function scrollToMark() {
+        document.getElementById("mark_id").scrollIntoView();
+        document.getElementById("mark_id2").scrollIntoView();
+    }"""
 DOC_HTML = """
 <style>
     .box{
@@ -32,6 +35,51 @@ DOC_HTML = """
     </iframe>
 </div>
 <div class="clear"></div>
+"""
+
+DOC_HTML2 = """
+<style>
+    .myBox {
+        font-size: 14px;
+        border: none;
+        padding: 20px;
+        width: 100%;
+        height: 200px;
+        overflow: scroll;
+        line-height: 1.5;
+    }
+    p {
+    margin: -15px 10px;
+}
+</style>
+<div style="width: 100%; overflow: hidden;">
+<div class="c01131m">
+    <label class="c01132m" for="documentSite">Document: {{doc_idA}}</label>
+    <body>
+        <div class="myBox">
+        <p>
+            {{{bert_docA}}}
+        </div>
+    </body>
+</div>
+<div class="c01131m">
+    <label class="c01132m" for="documentSite">Document: {{doc_idB}}</label>
+    <body>
+        <div class="myBox">
+        <p>
+            {{{bert_docB}}}
+        </div>
+    </body>
+</div>
+</div>
+<style onload="scrollToMark()" />
+<script>
+function scrollToMark() {
+        console.log("hello world");
+        document.getElementById({{mention_idA}}).scrollIntoView();
+        document.getElementById({{mention_idB}}).scrollIntoView();
+    }
+</script>
 """
 
 
@@ -146,20 +194,19 @@ class Clustering:
                     coref_task = copy.deepcopy(target_task)
 
                     coref_task.pop('marked_doc')
-                    cand_task['target_doc'] = f'http://localhost:8090/{target_task["mention_id"]}.html#{target_task["mention_id"]}'
-                    cand_task['candidate_doc'] = f'http://localhost:8090/{cand_task["mention_id"]}.html#{cand_task["mention_id"]}'
+                    target_task['bert_docA'] = target_task["marked_doc"]
+                    target_task['bert_docB'] = cand_task["marked_doc"].replace('"mark_id"', '"mark_id2"')
 
-                    target_task[
-                        'target_doc'] = f'http://localhost:8090/{target_task["mention_id"]}.html#{target_task["mention_id"]}'
-                    target_task[
-                        'candidate_doc'] = f'http://localhost:8090/{cand_task["mention_id"]}.html#{cand_task["mention_id"]}'
+                    target_task['mention_idA'] = target_task["mention_id"]
+                    target_task['mention_idB'] = cand_task["mention_id"]
+
+                    target_task['doc_idA'] = target_task["mention_id"]
+                    target_task['doc_idB'] = cand_task["mention_id"]
 
                     self.target_task = target_task
                     self.candidate_cluster = cand_tasks
                     self.comparisons += 1
 
-                    # target_task['_task_hash'] = hash(target_task['mention_id'])
-                    # target_task['_input_hash'] = -hash(target_task['mention_id'])
                     target_task = set_hashes(target_task, input_keys=('text',), task_keys=('text', 'mention_id'), overwrite=True)
                     yield target_task
             self.target_task = target_task
@@ -218,9 +265,9 @@ def event_coref_recipe(dataset: str, spacy_model: str, source: str, num_cands: i
     update = True
 
     blocks = [
-        {'view_id': 'ner'},
         # {"view_id": "html", "html_template": "<p>{{doc_text}}</p>"}
-        {"view_id": "html", "html_template": DOC_HTML}
+        {"view_id": "html", "html_template": DOC_HTML2},
+        {'view_id': 'ner'}
     ]
 
     config = {

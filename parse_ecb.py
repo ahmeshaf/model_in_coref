@@ -190,7 +190,7 @@ def parse_annotations(annotation_folder, output_folder, spacy_model='en_core_web
             final_token_id = mention_tokens[-1]['t_id']
             mention['start'] = int(sent_token_map[first_token_id]['number'])
             mention['end'] = int(sent_token_map[final_token_id]['number'])
-            sent_token_map[first_token_id]['text'] = f' <mark id="{mention_id}"> ' + sent_token_map[first_token_id]['text']
+            sent_token_map[first_token_id]['text'] = f' <mark id="mark_id"> ' + sent_token_map[first_token_id]['text']
             if final_token_id not in sent_token_map:
                 print(doc_name)
             sent_token_map[final_token_id]['text'] = sent_token_map[final_token_id]['text'] + ' </mark> '
@@ -201,7 +201,9 @@ def parse_annotations(annotation_folder, output_folder, spacy_model='en_core_web
             doc_sent_map_copy = deepcopy(doc_sent_map[doc_name])
             doc_sent_map_copy[sent_id]['sentence'] = bert_sentence
             bert_doc = '\n'.join([s['sentence'] for s in doc_sent_map_copy.values()])
-            mention['bert_doc'] = bert_doc
+            # mention['bert_doc'] = bert_doc
+
+            mention['bert_doc'] = '\n'.join(['<p> ' + s['sentence'] for s in doc_sent_map_copy.values()])
 
             # coref_id
             if m_id in relation_map:
