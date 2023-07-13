@@ -239,7 +239,7 @@ def event_coref_recipe(dataset: str, spacy_model: str, source: str, num_cands: i
     # config["batch_size"] = 10
 
     if update:
-        config["batch_size"] = 1780
+        config["batch_size"] = 1
         config["instant_submit"] = True
 
     def before_db(answers):
