@@ -14,7 +14,7 @@ import prodigy
 import spacy
 import copy
 import threading
-# from prodigy.util import set_hashes
+from prodigy.util import set_hashes
 JAVASCRIPT = ""
 DOC_HTML = """
 <style>
@@ -158,8 +158,9 @@ class Clustering:
                     self.candidate_cluster = cand_tasks
                     self.comparisons += 1
 
-                    target_task['_task_hash'] = hash(target_task['mention_id'])
-                    target_task['_input_hash'] = -hash(target_task['mention_id'])
+                    # target_task['_task_hash'] = hash(target_task['mention_id'])
+                    # target_task['_input_hash'] = -hash(target_task['mention_id'])
+                    target_task = set_hashes(target_task, input_keys=('text',), task_keys=('text', 'mention_id'), overwrite=True)
                     yield target_task
             self.target_task = target_task
             if not self.found_cluster:
