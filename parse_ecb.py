@@ -430,15 +430,12 @@ def generate_tasks(mentions):
                 'doc_id': mention['doc_id'],
                 'sentence_id': int(mention['sentence_id']),
             },
-            '_input_hash': hash(mention['mention_id']),
-            '_task_hash': -hash(mention['mention_id']),
         }
         my_tasks.append(task)
     return my_tasks
 
 
 if __name__ == '__main__':
-    from prodigy.util import set_hashes
     from prodigy.components.db import connect
     # en_core_web_md test
     if len(sys.argv) != 3:
