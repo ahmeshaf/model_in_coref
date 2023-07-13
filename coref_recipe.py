@@ -331,6 +331,7 @@ def event_coref_recipe(dataset: str, spacy_model: str, source: str, num_cands: i
         "blocks": blocks,
         "custom_theme": {"cardMaxWidth": 1000},
         "feed_overlap": False,
+        "host": '0.0.0.0',
         "javascript": JAVASCRIPT,
     }
 
