@@ -39,6 +39,57 @@ DOC_HTML = """
 
 DOC_HTML2 = """
 <style>
+.c0178m {
+          box-sizing: border-box;
+        }
+        .c0179m {
+          width: 100%;
+          font-size: 20px;
+          word-wrap: break-word;
+          white-space: normal;
+        }
+        .c0179m:focus {
+          outline: 0;
+        }
+        .c0179m:empty {
+          display: none;
+        }
+        .c0179m iframe, .c0179 img {
+          maxwidth: 100%;
+        }
+        .c0180m {
+          padding: 20px;
+          padding: 20px;
+          text-align: center;
+        }
+        .c01131m {
+            border: 1px solid #ddd;
+            text-align: left;
+            border-radius: 4px;
+        }
+        .c01131m:focus-within {
+          box-shadow: 0 0 0 1px #583fcf;
+          border-color: #583fcf;
+        }
+        .c01132m {
+          top: -3px;
+          opacity: 0.75;
+          position: relative;
+          font-size: 12px;
+          font-weight: bold;
+          padding-left: 10px;
+        }
+        .c01133m {
+          width: 100%;
+          border: 0;
+          padding: 10px;
+          font-size: 20px;
+          background: transparent;
+          font-family: "Lato", "Trebuchet MS", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .c01133m:focus {
+          outline: 0;
+        }
     .myBox {
         font-size: 14px;
         border: none;
@@ -54,7 +105,7 @@ DOC_HTML2 = """
 </style>
 <div style="width: 100%; overflow: hidden;">
 <div class="c01131m">
-    <label class="c01132m" for="documentSite">Document: {{doc_idA}}</label>
+    <label class="c01132m" for="documentSite">Target Document: {{doc_idA}}</label>
     <body>
         <div class="myBox">
         <p>
@@ -63,7 +114,7 @@ DOC_HTML2 = """
     </body>
 </div>
 <div class="c01131m">
-    <label class="c01132m" for="documentSite">Document: {{doc_idB}}</label>
+    <label class="c01132m" for="documentSite">Candidate Document: {{doc_idB}}</label>
     <body>
         <div class="myBox">
         <p>
