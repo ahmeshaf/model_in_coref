@@ -1,6 +1,6 @@
 # How Good is the Model in Model-in-the-loop Event Coreference Resolution Annotations
 
-Code for the paper presented at the 17th Linguistics Annotation Workshop, ACL 2023.
+Accompanying code for the paper, [How Good is the Model in Model-in-the-loop Event Coreference Resolution Annotations](https://aclanthology.org/2023.law-1.14) published in the 17th Linguistics Annotation Workshop, ACL 2023.
 
 ## Annotation interface
 
