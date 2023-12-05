@@ -29,3 +29,27 @@ Lambda Analysis on Dev sets
 python simulation.py
 ```
 
+## Citation
+If you find this code to be useful, please use the following citation:
+
+```
+@inproceedings{ahmed-etal-2023-good,
+    title = "How Good Is the Model in Model-in-the-loop Event Coreference Resolution Annotation?",
+    author = "Ahmed, Shafiuddin Rehan  and
+      Nath, Abhijnan  and
+      Regan, Michael  and
+      Pollins, Adam  and
+      Krishnaswamy, Nikhil  and
+      Martin, James H.",
+    editor = "Prange, Jakob  and
+      Friedrich, Annemarie",
+    booktitle = "Proceedings of the 17th Linguistic Annotation Workshop (LAW-XVII)",
+    month = jul,
+    year = "2023",
+    address = "Toronto, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.law-1.14",
+    doi = "10.18653/v1/2023.law-1.14",
+    pages = "136--145",
+}
+```
