@@ -4,6 +4,14 @@ Accompanying code for the paper, [How Good is the Model in Model-in-the-loop Eve
 
 ## Annotation interface
 
+### Prereqs
+
+```shell
+pip install bs4 lxml spacy
+python -m spacy download en_core_web_md
+```
+- Download and install Prodigy: https://prodi.gy/docs/install
+
 ### Preparing ECB+ Dataset
 
 - Event Coref Bank Plus Corpus: https://github.com/cltl/ecbPlus
